@@ -4,13 +4,14 @@
 struct diretorio
 {
   char nome[100];
-  int UID;
+  unsigned int UID;
   long int tamanho_og;
   long int tamanho_disc;
-  int data;
+  long int data;
   int ordem;
   int local;
 };
 
+struct diretorio *inicializa_arquivo(char *arquivo, int ordem, long int local, char *argv);
 
 #endif

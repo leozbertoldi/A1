@@ -2,11 +2,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <string.h>
 #include "func.h"
 
 int main(int argc, char **argv)
 {
-  int option;
+  int option, ordem;
+  long int local;
+  struct diretorio *FILE;
+
   for (int i = 1; i < argc; i++)
   {
     if (argv[i][0] == '-')
@@ -46,7 +50,17 @@ int main(int argc, char **argv)
       }
     }
     else 
-      printf("Arquivo %s\n", argv[i]);
+    {
+      FILE = inicializa_arquivo(argv[i], i /*ordem futura*/, i /*local*/, argv[i]);
+      printf("Arquivo %s:\n", argv[i]);
+      printf("Nome: %s\n", FILE->nome);
+      printf("UID: %d\n", FILE->UID);
+      printf("Tam.Og: %ld\n", FILE->tamanho_og);
+      printf("Tam.Disco: %ld\n", FILE->tamanho_disc);
+      printf("Data: %ld\n", FILE->data);
+      printf("Ordem: %d\n", FILE->ordem);
+      printf("Local: %d\n", FILE->local);
+    }
   }
 
   return 0;
