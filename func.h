@@ -3,7 +3,7 @@
 
 struct diretorio
 {
-  char nome[100];
+  char nome[1024];
   unsigned int UID;
   long int tamanho_og;
   long int tamanho_disc;
