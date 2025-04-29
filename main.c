@@ -17,7 +17,7 @@ int main(int argc, char **argv)
       option = 1;
     else 
       option = 0;
-
+    
     if (option)
     {
       switch (argv[i][1])
@@ -43,25 +43,18 @@ int main(int argc, char **argv)
 
         case 'c':
           printf("caso -c\n");
+          FILE = inicializa_arquivo(argv[i+1], i+1 /*ordem futura*/, i+1 /*local*/);
+          if (FILE)
+            opcao_c(FILE);
           break;
 
         default:
           break;
       }
     }
-    else 
-    {
-      FILE = inicializa_arquivo(argv[i], i /*ordem futura*/, i /*local*/, argv[i]);
-      printf("Arquivo %s:\n", argv[i]);
-      printf("Nome: %s\n", FILE->nome);
-      printf("UID: %d\n", FILE->UID);
-      printf("Tam.Og: %ld\n", FILE->tamanho_og);
-      printf("Tam.Disco: %ld\n", FILE->tamanho_disc);
-      printf("Data: %ld\n", FILE->data);
-      printf("Ordem: %d\n", FILE->ordem);
-      printf("Local: %d\n", FILE->local);
-    }
   }
+  printf("\n");
+  printf("Fim!\n");
 
   return 0;
 }

@@ -4,7 +4,7 @@
 #include <string.h>
 #include "func.h"
 
-struct diretorio *inicializa_arquivo(char *arquivo, int ordem, long int local, char *argv)
+struct diretorio *inicializa_arquivo(char *arquivo, int ordem, long int local)
 {
   struct stat info;
   struct diretorio *d = malloc(sizeof(struct diretorio));
@@ -16,7 +16,7 @@ struct diretorio *inicializa_arquivo(char *arquivo, int ordem, long int local, c
     return NULL;
   }
 
-  strncpy(d->nome, argv, 99);
+  strncpy(d->nome, arquivo, 99);
   d->UID = info.st_uid;
   d->tamanho_og = info.st_size;
   d->tamanho_disc = info.st_size * 512;
@@ -25,4 +25,19 @@ struct diretorio *inicializa_arquivo(char *arquivo, int ordem, long int local, c
   d->local = local;
 
   return d;
+}
+
+void opcao_c(struct diretorio *arquivo)
+{
+  printf("=========================================\n");
+  printf("Nome: %s\n", arquivo->nome);
+  printf("UID: %d\n", arquivo->UID);
+  printf("Tam.Og: %ld\n", arquivo->tamanho_og);
+  printf("Tam.Disco: %ld\n", arquivo->tamanho_disc);
+  printf("Data: %ld\n", arquivo->data);
+  printf("Ordem: %d\n", arquivo->ordem);
+  printf("Local: %d\n", arquivo->local);
+  printf("=========================================\n");
+
+  return;
 }
