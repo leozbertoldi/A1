@@ -7,49 +7,89 @@
 
 int main(int argc, char **argv)
 {
-  int option, ordem;
-  long int local;
+  int ordem, option, flag;
   struct diretorio *FILE;
+  ordem = 0;
 
   for (int i = 1; i < argc; i++)
   {
     if (argv[i][0] == '-')
-      option = 1;
-    else 
-      option = 0;
-    
-    if (option)
     {
       switch (argv[i][1])
       {
         case 'i':
           if(argv[i][2] == 'p')
-            printf("caso -ip\n");
+          {
+            option = 0;
+            flag = 1;
+          }
           else if (argv[i][2] == 'c')
-            printf("caso -ic\n");
+          {
+            option = 1;
+            flag = 1;
+          }
+          ordem++; /*se arquivo não for repetido*/
           break;
 
         case 'm':
-          printf("caso -m membro\n");
+          option = 2;
+          flag = 1;
           break;
 
         case 'x':
-          printf("caso -x\n");
+          option = 3;
+          flag = 1;
           break;
 
         case 'r':
-          printf("caso -r\n");
+          option = 4;
+          flag = 1;
           break;
 
         case 'c':
-          printf("caso -c\n");
-          FILE = inicializa_arquivo(argv[i+1], i+1 /*ordem futura*/, i+1 /*local*/);
-          if (FILE)
-            opcao_c(FILE);
+          option = 5;
+          flag = 1;
           break;
 
         default:
           break;
+      }
+    }  
+    else if (flag == 1)
+    {
+      FILE = inicializa_arquivo(argv[i], ordem, i /*local*/);
+      
+      if (FILE)
+      {
+        switch (option)
+        {
+          case 0:
+            printf("caso -ip\n");
+            break;
+
+          case 1:
+            printf("caso -ic\n");
+            break;
+
+          case 2:
+            printf("caso -m\n");
+            break;
+
+          case 3:
+            printf("caso -x\n");
+            break;
+
+          case 4:
+            printf("caso -r\n");
+            break;
+
+          case 5:
+            opcao_c(FILE);
+            break;
+  
+          default:
+            break;
+        }
       }
     }
   }
