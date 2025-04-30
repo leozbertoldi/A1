@@ -16,4 +16,12 @@ struct diretorio *inicializa_arquivo(char *arquivo, int ordem, long int local);
 
 void opcao_c(struct diretorio *arquivo);
 
+void opcao_ip(struct diretorio *arquivo);
+
+void opcao_m(struct diretorio *arquivo);
+
+void opcao_x(struct diretorio *arquivo);
+
+void opcao_r(struct diretorio *arquivo);
+
 #endif

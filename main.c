@@ -7,9 +7,10 @@
 
 int main(int argc, char **argv)
 {
-  int ordem, option, flag;
-  struct diretorio *FILE;
+  int ordem, option, flag, criado;
+  struct diretorio *FILE, *archive;
   ordem = 0;
+  criado = 0;
 
   for (int i = 1; i < argc; i++)
   {
@@ -55,6 +56,12 @@ int main(int argc, char **argv)
           break;
       }
     }  
+    else if (strcmp(argv[i], "archive.vc") == 0 && criado == 0)
+    {
+      archive = fopen(argv[i], "ab");
+      printf("ARCHIVE CRIADO\n");
+      criado = 1;
+    }
     else if (flag == 1)
     {
       FILE = inicializa_arquivo(argv[i], ordem, i /*local*/);

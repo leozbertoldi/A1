@@ -27,6 +27,28 @@ struct diretorio *inicializa_arquivo(char *arquivo, int ordem, long int local)
   return d;
 }
 
+void opcao_ip(struct diretorio *arquivo)
+{
+  struct diretorio *FILE;
+  //fwrite(const void *ptr, size_t size, size_t count, FILE *stream);
+  return;
+}
+
+void opcao_m(struct diretorio *arquivo)
+{
+  return;
+}
+
+void opcao_x(struct diretorio *arquivo)
+{
+  return;
+}
+
+void opcao_r(struct diretorio *arquivo)
+{
+  return;
+}
+
 void opcao_c(struct diretorio *arquivo)
 {
   printf("=========================================\n");
