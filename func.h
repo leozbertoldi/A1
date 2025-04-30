@@ -14,14 +14,14 @@ struct diretorio
 
 struct diretorio *inicializa_arquivo(char *arquivo, int ordem, long int local);
 
-void opcao_c(struct diretorio *arquivo);
+void opcao_c(struct diretorio *arquivo, struct diretorio *archive);
 
-void opcao_ip(struct diretorio *arquivo);
+void opcao_ip(struct diretorio *arquivo, struct diretorio *archive);
 
-void opcao_m(struct diretorio *arquivo);
+void opcao_m(struct diretorio *arquivo, struct diretorio *archive);
 
-void opcao_x(struct diretorio *arquivo);
+void opcao_x(struct diretorio *arquivo, struct diretorio *archive);
 
-void opcao_r(struct diretorio *arquivo);
+void opcao_r(struct diretorio *arquivo, struct diretorio *archive);
 
 #endif

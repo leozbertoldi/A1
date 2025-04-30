@@ -91,7 +91,7 @@ int main(int argc, char **argv)
             break;
 
           case 5:
-            opcao_c(FILE);
+            opcao_c(FILE, archive);
             break;
   
           default:
