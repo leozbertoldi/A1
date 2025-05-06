@@ -7,9 +7,10 @@
 
 int main(int argc, char **argv)
 {
-  int ordem, option, flag, criado;
-  struct diretorio *FILE, *archive;
-  ordem = 0;
+  int option, flag, criado, tamanho;
+  FILE *archive;
+  struct diretorio *arquivo, *diretorios[100];
+  tamanho = 0;
   criado = 0;
 
   for (int i = 1; i < argc; i++)
@@ -29,7 +30,6 @@ int main(int argc, char **argv)
             option = 1;
             flag = 1;
           }
-          ordem++; /*se arquivo não for repetido*/
           break;
 
         case 'm':
@@ -58,24 +58,30 @@ int main(int argc, char **argv)
     }  
     else if (strcmp(argv[i], "archive.vc") == 0 && criado == 0)
     {
-      archive = fopen(argv[i], "ab");
+      archive = fopen(argv[i], "ab+");
       printf("ARCHIVE CRIADO\n");
       criado = 1;
     }
-    else if (flag == 1)
+    else if (flag == 1 && criado == 1)
     {
-      FILE = inicializa_arquivo(argv[i], ordem, i /*local*/);
-      
-      if (FILE)
+      if (option != 3)
+        arquivo = inicializa_arquivo(argv[i]);
+
+      if (arquivo || option == 3)
       {
+        diretorios[tamanho] = arquivo;
         switch (option)
         {
           case 0:
             printf("caso -ip\n");
+            opcao_ip(arquivo, archive);
+            //escreve_diretorio(*diretorios, tamanho, archive);
+            tamanho++; /*se arquivo não for repetido*/
             break;
 
           case 1:
             printf("caso -ic\n");
+            tamanho++; /*se arquivo não for repetido*/
             break;
 
           case 2:
@@ -84,14 +90,16 @@ int main(int argc, char **argv)
 
           case 3:
             printf("caso -x\n");
+            opcao_x(argv[i], archive);
             break;
 
           case 4:
             printf("caso -r\n");
+            tamanho--;
             break;
 
           case 5:
-            opcao_c(FILE, archive);
+            opcao_c(arquivo, archive);
             break;
   
           default:
@@ -102,6 +110,8 @@ int main(int argc, char **argv)
   }
   printf("\n");
   printf("Fim!\n");
+  if (criado)
+    fclose(archive);
 
   return 0;
 }

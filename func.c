@@ -4,10 +4,12 @@
 #include <string.h>
 #include "func.h"
 
-struct diretorio *inicializa_arquivo(char *arquivo, int ordem, long int local)
+struct diretorio *inicializa_arquivo(char *arquivo)
 {
   struct stat info;
   struct diretorio *d = malloc(sizeof(struct diretorio));
+  if (!d)
+    return NULL;
 
   if (stat(arquivo, &info) != 0) 
   {
@@ -17,39 +19,113 @@ struct diretorio *inicializa_arquivo(char *arquivo, int ordem, long int local)
   }
 
   strncpy(d->nome, arquivo, 99);
+  d->nome[99] = '\0';
   d->UID = info.st_uid;
   d->tamanho_og = info.st_size;
-  d->tamanho_disc = info.st_size * 512;
+  d->tamanho_disc = info.st_size;
   d->data = info.st_mtime; 
-  d->ordem = ordem;
-  d->local = local;
+  d->ordem = -1;
+  d->local = -1;
 
   return d;
 }
 
-void opcao_ip(struct diretorio *arquivo, struct diretorio *archive)
+void escreve_diretorio(struct diretorio diretorios[], int n, FILE *archive)
 {
-  struct diretorio *FILE;
-  //fwrite(const void *ptr, size_t size, size_t count, FILE *stream);
+  if (!diretorios || !archive)
+    return;
+
+  for (int i = 0; i < n; i++)
+    fwrite(&diretorios[i], sizeof(struct diretorio), 1, archive);
+
+  fwrite(&n, sizeof(int), 1, archive);
+
   return;
 }
 
-void opcao_m(struct diretorio *arquivo, struct diretorio *archive)
+void opcao_ip(struct diretorio *arquivo, FILE *archive)
 {
+  FILE *file;
+  long int bytes, offset;
+  char *buffer;
+
+  if (!arquivo || !archive)
+    return;
+
+  buffer = malloc(arquivo->tamanho_og);
+  if (!buffer)
+    return;
+
+  file = fopen(arquivo->nome, "rb+");
+  if (!file)
+  {
+    printf("Erro ao abrir o arquivo %s\n", arquivo->nome);
+  }
+
+  fseek(archive, 0, SEEK_END);
+  offset = ftell(archive); //ftell serve para falar a posição do ponteiro
+
+  bytes = fread(buffer, 1, sizeof(buffer), file);
+  while (bytes > 0)
+  {
+    fwrite(buffer, 1, bytes, archive);
+    bytes = fread(buffer, 1, sizeof(buffer), file);
+  }
+
+  fclose(file);
+  arquivo->ordem = 0;
+  arquivo->local = offset;
+  arquivo->tamanho_disc = arquivo->tamanho_og;
+  free(buffer);
+
   return;
 }
 
-void opcao_x(struct diretorio *arquivo, struct diretorio *archive)
+/*void opcao_ic(struct diretorio *arquivo, FILE *archive)
 {
+
+}
+
+void opcao_m(struct diretorio *arquivo, FILE  *archive)
+{
+  return;
+}*/
+
+void opcao_x(char *arquivo, FILE *archive)
+{
+  FILE *file;
+  char buffer[1024];
+  long int bytes;
+
+  if (!arquivo || !archive)
+    return;
+
+  file = fopen(arquivo, "wb");
+  if (!file)
+  {
+    printf("Erro ao abrir o arquivo %s\n", arquivo);
+    return;
+  }
+
+  fseek(archive, 0/*arquivo->local*/, SEEK_SET);
+  bytes = fread(buffer, 1, sizeof(buffer), archive);
+  while (bytes > 0)
+  {
+    fwrite(buffer, 1, bytes, file);
+    bytes = fread(buffer, 1, sizeof(buffer), archive);
+  }
+
+  fclose(file);
+
   return;
 }
 
-void opcao_r(struct diretorio *arquivo, struct diretorio *archive)
+/*void opcao_r(struct diretorio *arquivo, FILE *archive)
 {
   return;
-}
+}*/
 
-void opcao_c(struct diretorio *arquivo, struct diretorio *archive)
+void opcao_c(struct diretorio *arquivo, FILE *archive)
 {
   printf("=========================================\n");
   printf("Nome: %s\n", arquivo->nome);

@@ -12,16 +12,20 @@ struct diretorio
   int local;
 };
 
-struct diretorio *inicializa_arquivo(char *arquivo, int ordem, long int local);
+struct diretorio *inicializa_arquivo(char *arquivo);
 
-void opcao_c(struct diretorio *arquivo, struct diretorio *archive);
+void escreve_diretorio(struct diretorio diretorios[], int n, FILE *archive);
 
-void opcao_ip(struct diretorio *arquivo, struct diretorio *archive);
+void opcao_c(struct diretorio *arquivo,  FILE *archive);
 
-void opcao_m(struct diretorio *arquivo, struct diretorio *archive);
+void opcao_ip(struct diretorio *arquivo,  FILE *archive);
 
-void opcao_x(struct diretorio *arquivo, struct diretorio *archive);
+void opcao_ic(struct diretorio *arquivo, FILE *archive);
 
-void opcao_r(struct diretorio *arquivo, struct diretorio *archive);
+void opcao_m(struct diretorio *arquivo, FILE *archive);
+
+void opcao_x(char *arquivo, FILE *archive);
+
+void opcao_r(struct diretorio *arquivo, FILE *archive);
 
 #endif
