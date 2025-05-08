@@ -30,13 +30,40 @@ struct diretorio *inicializa_arquivo(char *arquivo)
   return d;
 }
 
-void escreve_diretorio(struct diretorio diretorios[], int n, FILE *archive)
+int le_diretorio(struct diretorio **diretorios, FILE *archive)
+{
+  int tam, i;
+
+  if (!diretorios || !archive)
+    return -1;
+
+  if (ftell(archive) == 0)
+    return 0;
+
+  fseek(archive, -sizeof(int), SEEK_END); //achar o tamanho do diretório
+  fread(&tam, sizeof(int), 1, archive); //pega o valor e armazena em tam
+  if (tam != 1) //se deu errado a leitura
+    return 0;
+
+  fseek(archive, -(sizeof(int) + tam * sizeof(struct diretorio)), SEEK_END); //vai até o começo do diretório
+  for (i = 0; i < tam; i++)
+  {
+    if (diretorios[i])
+      free(diretorios[i]);
+    diretorios[i] = malloc(sizeof(struct diretorio));
+    fread(diretorios[i], sizeof(struct diretorio), 1, archive);
+  }
+
+  return tam;
+}
+
+void escreve_diretorio(struct diretorio **diretorios, int n, FILE *archive)
 {
   if (!diretorios || !archive)
     return;
 
   for (int i = 0; i < n; i++)
-    fwrite(&diretorios[i], sizeof(struct diretorio), 1, archive);
+    fwrite(diretorios[i], sizeof(struct diretorio), 1, archive);
 
   fwrite(&n, sizeof(int), 1, archive);
 
@@ -51,6 +78,8 @@ void opcao_ip(struct diretorio *arquivo, FILE *archive)
 
   if (!arquivo || !archive)
     return;
+  
+  //if (not repetido)
 
   buffer = malloc(arquivo->tamanho_og);
   if (!buffer)
@@ -81,17 +110,17 @@ void opcao_ip(struct diretorio *arquivo, FILE *archive)
   return;
 }
 
-/*void opcao_ic(struct diretorio *arquivo, FILE *archive)
+/*void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios)
 {
 
 }
 
-void opcao_m(struct diretorio *arquivo, FILE  *archive)
+void opcao_m(struct diretorio *arquivo, FILE  *archive, struct diretorio **diretorios)
 {
   return;
 }*/
 
-void opcao_x(char *arquivo, FILE *archive)
+void opcao_x(struct diretorio *arquivo, FILE *archive)
 {
   FILE *file;
   char buffer[1024];
@@ -100,14 +129,14 @@ void opcao_x(char *arquivo, FILE *archive)
   if (!arquivo || !archive)
     return;
 
-  file = fopen(arquivo, "wb");
+  file = fopen(arquivo->nome, "wb");
   if (!file)
   {
-    printf("Erro ao abrir o arquivo %s\n", arquivo);
+    printf("Erro ao abrir o arquivo %s\n", arquivo->nome);
     return;
   }
 
-  fseek(archive, 0/*arquivo->local*/, SEEK_SET);
+  fseek(archive, arquivo->local, SEEK_SET);
   bytes = fread(buffer, 1, sizeof(buffer), archive);
   while (bytes > 0)
   {
@@ -120,22 +149,34 @@ void opcao_x(char *arquivo, FILE *archive)
   return;
 }
 
-/*void opcao_r(struct diretorio *arquivo, FILE *archive)
+/*void opcao_r(struct diretorio *arquivo, FILE *archive, struct diretorio *diretorios[])
 {
   return;
 }*/
 
-void opcao_c(struct diretorio *arquivo, FILE *archive)
+void opcao_c(FILE *archive, struct diretorio **diretorios)
 {
-  printf("=========================================\n");
-  printf("Nome: %s\n", arquivo->nome);
-  printf("UID: %d\n", arquivo->UID);
-  printf("Tam.Og: %ld\n", arquivo->tamanho_og);
-  printf("Tam.Disco: %ld\n", arquivo->tamanho_disc);
-  printf("Data: %ld\n", arquivo->data);
-  printf("Ordem: %d\n", arquivo->ordem);
-  printf("Local: %d\n", arquivo->local);
-  printf("=========================================\n");
+  int tam, i;
+
+  if (!archive || !diretorios)
+    return;
+
+  tam = le_diretorio(diretorios, archive);
+  if (tam <= 0)
+    printf("Sem arquivos no archive\n");
+
+  for (i = 0; i < tam; i++)
+  {
+    printf("=========================================\n");
+    printf("Nome: %s\n", diretorios[i]->nome);
+    printf("UID: %d\n", diretorios[i]->UID);
+    printf("Tam.Og: %ld\n", diretorios[i]->tamanho_og);
+    printf("Tam.Disco: %ld\n", diretorios[i]->tamanho_disc);
+    printf("Data: %ld\n", diretorios[i]->data);
+    printf("Ordem: %d\n", diretorios[i]->ordem);
+    printf("Local: %d\n", diretorios[i]->local);
+    printf("=========================================\n");
+  }
 
   return;
 }

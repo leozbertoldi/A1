@@ -14,18 +14,20 @@ struct diretorio
 
 struct diretorio *inicializa_arquivo(char *arquivo);
 
-void escreve_diretorio(struct diretorio diretorios[], int n, FILE *archive);
+int le_diretorio(struct diretorio **diretorios, FILE *archive);
 
-void opcao_c(struct diretorio *arquivo,  FILE *archive);
+void escreve_diretorio(struct diretorio **diretorios, int n, FILE *archive);
+
+void opcao_c(FILE *archive, struct diretorio **diretorios);
 
 void opcao_ip(struct diretorio *arquivo,  FILE *archive);
 
-void opcao_ic(struct diretorio *arquivo, FILE *archive);
+void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios);
 
-void opcao_m(struct diretorio *arquivo, FILE *archive);
+void opcao_m(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios);
 
-void opcao_x(char *arquivo, FILE *archive);
+void opcao_x(struct diretorio *arquivo, FILE *archive);
 
-void opcao_r(struct diretorio *arquivo, FILE *archive);
+void opcao_r(FILE *archive, struct diretorio **diretorios);
 
 #endif

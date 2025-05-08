@@ -7,11 +7,16 @@
 
 int main(int argc, char **argv)
 {
-  int option, flag, criado, tamanho;
+  int option, flag, criado, tamanho, capacidade;
   FILE *archive;
-  struct diretorio *arquivo, *diretorios[100];
+  struct diretorio *arquivo, **diretorios;
   tamanho = 0;
   criado = 0;
+  capacidade = 10;
+
+  diretorios = malloc(capacidade * sizeof(struct diretorio *));
+  if (!diretorios)
+    return -1;
 
   for (int i = 1; i < argc; i++)
   {
@@ -69,13 +74,24 @@ int main(int argc, char **argv)
 
       if (arquivo || option == 3)
       {
-        diretorios[tamanho] = arquivo;
         switch (option)
         {
           case 0:
             printf("caso -ip\n");
+            tamanho = le_diretorio(diretorios, archive);
+            if (tamanho == capacidade)
+            {
+              capacidade *= 2; //dobra a capacidade
+              diretorios = realloc(diretorios, capacidade * sizeof(struct diretorio *));
+              if (!diretorios)
+              {
+                printf("Erro ao realocar vetor de diretórios\n");
+                return -1;
+              }
+            }          
             opcao_ip(arquivo, archive);
-            //escreve_diretorio(*diretorios, tamanho, archive);
+            diretorios[tamanho] = arquivo;
+            escreve_diretorio(diretorios, tamanho, archive);
             tamanho++; /*se arquivo não for repetido*/
             break;
 
@@ -90,7 +106,7 @@ int main(int argc, char **argv)
 
           case 3:
             printf("caso -x\n");
-            opcao_x(argv[i], archive);
+            opcao_x(arquivo, archive);
             break;
 
           case 4:
@@ -99,7 +115,7 @@ int main(int argc, char **argv)
             break;
 
           case 5:
-            opcao_c(arquivo, archive);
+            opcao_c(archive, diretorios);
             break;
   
           default:
