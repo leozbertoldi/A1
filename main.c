@@ -1,9 +1,10 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 #include <string.h>
 #include "func.h"
+#include "lz.h"
 
 int main(int argc, char **argv)
 {
@@ -89,15 +90,11 @@ int main(int argc, char **argv)
                 return -1;
               }
             }          
-            opcao_ip(arquivo, archive);
-            diretorios[tamanho] = arquivo;
-            escreve_diretorio(diretorios, tamanho, archive);
-            tamanho++; /*se arquivo não for repetido*/
+            opcao_ip(arquivo, archive, diretorios);
             break;
 
           case 1:
             printf("caso -ic\n");
-            tamanho++; /*se arquivo não for repetido*/
             break;
 
           case 2:
@@ -111,7 +108,6 @@ int main(int argc, char **argv)
 
           case 4:
             printf("caso -r\n");
-            tamanho--;
             break;
 
           case 5:
@@ -132,7 +128,5 @@ int main(int argc, char **argv)
   return 0;
 }
 
-//ftrunc 
 //if tamanho >= compactado 
 //if compactado > normal armazena normal (se der o mesmo tamanhop, ficar com o plano)
-//nota extra pra permissões do arquivo

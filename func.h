@@ -20,7 +20,7 @@ void escreve_diretorio(struct diretorio **diretorios, int n, FILE *archive);
 
 void opcao_c(FILE *archive, struct diretorio **diretorios);
 
-void opcao_ip(struct diretorio *arquivo,  FILE *archive);
+void opcao_ip(struct diretorio *arquivo,  FILE *archive, struct diretorio **diretorios);
 
 void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios);
 
