@@ -137,6 +137,7 @@ int main(int argc, char **argv)
   printf("Fim!\n");
   if (criado)
     fclose(archive);
+  free(diretorios);
 
   return 0;
 }
