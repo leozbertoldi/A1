@@ -1,10 +1,9 @@
-#include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
-#include <sys/stat.h>
+#include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include "func.h"
-#include "lz.h"
 
 int main(int argc, char **argv)
 {
@@ -128,5 +127,4 @@ int main(int argc, char **argv)
   return 0;
 }
 
-//if tamanho >= compactado 
 //if compactado > normal armazena normal (se der o mesmo tamanhop, ficar com o plano)
