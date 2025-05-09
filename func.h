@@ -1,6 +1,8 @@
 #ifndef FUNCOES
 #define FUNCOES
 #include <unistd.h>
+#include <stdio.h>
+#include <sys/types.h>
 
 struct diretorio
 {

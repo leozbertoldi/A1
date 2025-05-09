@@ -2,7 +2,7 @@
 #Autoria Leonardo ZB 
 
 CC = gcc
-CFLAGS= -Wall -Wextra -g -std=c99 
+CFLAGS= -Wall -Wextra -g 
 
 all: main.o func.o lz.o
 	$(CC) -o vinac main.o func.o lz.o

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <sys/types.h>
 #include "func.h"
 #include "lz.h"
 
@@ -328,7 +329,7 @@ void opcao_x(struct diretorio *arquivo, FILE *archive, struct diretorio **direto
       return;
     }
   
-    fseek(archive, diretorios[num]->local, SEEK_SET);
+    fseek(archive, diretorios[num]->local, SEEK_SET); 
     bytes = fread(buffer, 1, sizeof(buffer), archive);
     while (bytes > 0)
     {
