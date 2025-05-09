@@ -292,31 +292,60 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   return;
 }*/
 
-void opcao_x(struct diretorio *arquivo, FILE *archive)
+void opcao_x(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios)
 {
   FILE *file;
   char buffer[1024];
   long int bytes;
+  int num, i;
 
-  if (!arquivo || !archive)
+  if (!archive)
     return;
 
-  file = fopen(arquivo->nome, "wb");
-  if (!file)
-  {
-    printf("Erro ao abrir o arquivo %s\n", arquivo->nome);
-    return;
-  }
+  tam = le_diretorio(diretorios, archive); //lê o diretório em archive
+  if (tam < 0)
+    printf("Erro na leitura do diretório\n");
 
-  fseek(archive, arquivo->local, SEEK_SET);
-  bytes = fread(buffer, 1, sizeof(buffer), archive);
-  while (bytes > 0)
+  if (arquivo)
   {
-    fwrite(buffer, 1, bytes, file);
+    for (i = 0; i < tam; i++)
+    {
+      if (strcmp(diretorios[i]->nome, arquivo->nome) == 0)
+        num = i;
+    }
+  
+    file = fopen(arquivo->nome, "wb");
+    if (!file)
+      {
+      printf("Erro ao abrir o arquivo %s\n", arquivo->nome);
+      return;
+    }
+  
+    fseek(archive, diretorios[num]->local, SEEK_SET);
     bytes = fread(buffer, 1, sizeof(buffer), archive);
-  }
+    while (bytes > 0)
+    {
+      fwrite(buffer, 1, bytes, file);
+      bytes = fread(buffer, 1, sizeof(buffer), archive);
+    }
 
-  fclose(file);
+    fclose(file);
+  }
+  else //extrai todos
+  {
+    for(i = 0; i < tam; i++)
+    {
+      fseek(archive, diretorios[i]->local, SEEK_SET);
+      file = fopen(diretorios[i]->nome, "wb");
+      bytes = fread(buffer, 1, sizeof(buffer), archive);
+      while (bytes > 0)
+      {
+        fwrite(buffer, 1, bytes, file);
+        bytes = fread(buffer, 1, sizeof(buffer), archive);
+      }
+      fclose(file);
+    }
+  }
 
   return;
 }

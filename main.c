@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 
           case 3:
             printf("caso -x\n");
-            opcao_x(arquivo, archive);
+            opcao_x(arquivo, archive, diretorios);
             break;
 
           case 4:
