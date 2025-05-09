@@ -297,7 +297,7 @@ void opcao_x(struct diretorio *arquivo, FILE *archive, struct diretorio **direto
   FILE *file;
   char buffer[1024];
   long int bytes;
-  int num, i;
+  int num, i, tam;
 
   if (!archive)
     return;
@@ -308,10 +308,16 @@ void opcao_x(struct diretorio *arquivo, FILE *archive, struct diretorio **direto
 
   if (arquivo)
   {
+    num = -1;
     for (i = 0; i < tam; i++)
     {
       if (strcmp(diretorios[i]->nome, arquivo->nome) == 0)
         num = i;
+    }
+    if (num == -1)
+    {
+      printf("Arquivo não está no archive\n");
+      return;
     }
   
     file = fopen(arquivo->nome, "wb");
