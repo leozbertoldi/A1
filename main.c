@@ -63,16 +63,16 @@ int main(int argc, char **argv)
     }  
     else if (strcmp(argv[i], "archive.vc") == 0 && criado == 0)
     {
-      archive = fopen(argv[i], "ab+");
+      archive = fopen(argv[i], "rb+");
       printf("ARCHIVE CRIADO\n");
       criado = 1;
     }
     else if (flag == 1 && criado == 1)
     {
-      if (option != 3)
+      if (option != 3 || option != 5)
         arquivo = inicializa_arquivo(argv[i]);
 
-      if (arquivo || option == 3)
+      if (arquivo || option == 3 || option == 5)
       {
         switch (option)
         {
@@ -94,6 +94,18 @@ int main(int argc, char **argv)
 
           case 1:
             printf("caso -ic\n");
+            tamanho = le_diretorio(diretorios, archive);
+            if (tamanho == capacidade)
+            {
+              capacidade *= 2; //dobra a capacidade
+              diretorios = realloc(diretorios, capacidade * sizeof(struct diretorio *));
+              if (!diretorios)
+              {
+                printf("Erro ao realocar vetor de diretórios\n");
+                return -1;
+              }
+            }          
+            opcao_ic(arquivo, archive, diretorios);
             break;
 
           case 2:
@@ -107,9 +119,11 @@ int main(int argc, char **argv)
 
           case 4:
             printf("caso -r\n");
+            opcao_r(arquivo, archive, diretorios);
             break;
 
           case 5:
+             printf("caso -c\n");
             opcao_c(archive, diretorios);
             break;
   
@@ -126,5 +140,3 @@ int main(int argc, char **argv)
 
   return 0;
 }
-
-//if compactado > normal armazena normal (se der o mesmo tamanhop, ficar com o plano)

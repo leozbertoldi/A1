@@ -105,7 +105,7 @@ void opcao_ip(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
     return;
   }
 
-  file = fopen(arquivo->nome, "rb+");
+  file = fopen(arquivo->nome, "rb");
   if (!file)
     printf("Erro ao abrir o arquivo %s\n", arquivo->nome);
 
@@ -181,7 +181,7 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
     return;
   }
 
-  file = fopen(arquivo->nome, "rb+");
+  file = fopen(arquivo->nome, "rb");
   if (!file)
     printf("Erro ao abrir o arquivo %s\n", arquivo->nome);
 
@@ -320,7 +320,7 @@ void opcao_x(struct diretorio *arquivo, FILE *archive, struct diretorio **direto
       return;
     }
   
-    file = fopen(arquivo->nome, "wb");
+    file = fopen(arquivo->nome, "rb+");
     if (!file)
       {
       printf("Erro ao abrir o arquivo %s\n", arquivo->nome);
@@ -356,10 +356,67 @@ void opcao_x(struct diretorio *arquivo, FILE *archive, struct diretorio **direto
   return;
 }
 
-/*void opcao_r(struct diretorio *arquivo, FILE *archive, struct diretorio *diretorios[])
+void opcao_r(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios)
 {
+  char *buffer; 
+  int i, num, tam;
+  long int fim;
+  num = -1;
+
+  if (!arquivo || !archive || !diretorios)
+    return;
+
+  tam = le_diretorio(diretorios, archive); //lê o diretório em archive
+  if (tam < 0)
+    printf("Erro na leitura do diretório\n");
+
+  for (i = 0; i < tam; i++) //acha o arquivo a ser removido do archive
+  {
+    if (strcmp(diretorios[i]->nome, arquivo->nome) == 0)
+      num = i;
+  }
+ 
+  if (num == -1)
+  {
+    printf("Arquivo não está no archive\n");
+    return;
+  }
+
+  for (i = num + 1; i < tam; i++)
+  {
+    buffer = malloc(sizeof(diretorios[i]->tamanho_disc));
+    if (!buffer)
+    {
+      printf("Erro ao alocar memória na remoção de arquivo\n");
+      return;
+    }
+    fseek(archive, diretorios[i]->local, SEEK_SET); //acha arquivo 
+    fread(buffer, 1, diretorios[i]->tamanho_disc, archive); //lê conteúdo
+    diretorios[i]->local = diretorios[i]->local - diretorios[num]->tamanho_disc; //diminue no offset o tam do arquivo que sai
+    fseek(archive, diretorios[i]->local, SEEK_SET);
+    fwrite(buffer, 1, diretorios[i]->tamanho_disc, archive);
+    free(buffer);
+  }
+
+  for (i = num; i < tam - 1; i++) //arruma a ordem do arquivos que estão depois
+  {
+    diretorios[i] = diretorios[i + 1];
+    diretorios[i]->ordem = diretorios[i]->ordem - 1;
+  }
+
+  free(diretorios[tam-1]);
+  tam--;
+
+  if (tam == 0)
+    fim = 0;
+  else 
+    fim = diretorios[tam-1]->local + diretorios[tam-1]->tamanho_disc;
+
+  ftruncate(fileno(archive), fim);
+  escreve_diretorio(diretorios, tam, archive);
+
   return;
-}*/
+}
 
 void opcao_c(FILE *archive, struct diretorio **diretorios)
 {

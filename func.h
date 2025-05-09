@@ -29,6 +29,6 @@ void opcao_m(struct diretorio *arquivo, FILE *archive, struct diretorio **direto
 
 void opcao_x(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios);
 
-void opcao_r(FILE *archive, struct diretorio **diretorios);
+void opcao_r(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios);
 
 #endif
