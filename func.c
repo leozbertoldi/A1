@@ -40,9 +40,13 @@ int le_diretorio(struct diretorio **diretorios, FILE *archive)
   if (!diretorios || !archive)
     return -1;
 
+  fseek(archive, 0, SEEK_END);
   tam_archive = ftell(archive);
   if (tam_archive < (long int)sizeof(int))
+  {
+    printf("skibidi");
     return 0;
+  }
 
   fseek(archive, -sizeof(int), SEEK_END); //achar o tamanho do diretório
   fread(&tam, sizeof(int), 1, archive); //pega o valor e armazena em tam

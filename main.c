@@ -63,7 +63,9 @@ int main(int argc, char **argv)
     }  
     else if (strcmp(argv[i], "archive.vc") == 0 && criado == 0)
     {
-      archive = fopen(argv[i], "rb+");
+      archive = fopen(argv[i], "ab+");
+      if (!archive)
+        printf("ARCHIVE NÃO FOI CRIADO\n");
       printf("ARCHIVE CRIADO\n");
       criado = 1;
     }
@@ -110,6 +112,7 @@ int main(int argc, char **argv)
 
           case 2:
             printf("caso -m\n");
+            //opcao_m(arquivo, archive, diretorios);
             break;
 
           case 3:
