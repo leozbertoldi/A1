@@ -7,11 +7,12 @@
 
 int main(int argc, char **argv)
 {
-  int option, flag, criado, tamanho, capacidade;
+  int option, flag, criado, tamanho, capacidade, feito;
   FILE *archive;
   struct diretorio *arquivo, **diretorios;
   tamanho = 0;
   criado = 0;
+  feito = 0;
   capacidade = 10;
 
   diretorios = malloc(capacidade * sizeof(struct diretorio *));
@@ -71,7 +72,7 @@ int main(int argc, char **argv)
     }
     else if (flag == 1 && criado == 1)
     {
-      if (option != 3 || option != 5)
+      if (option != 3 && option != 5)
         arquivo = inicializa_arquivo(argv[i]);
 
       if (arquivo || option == 3 || option == 5)
@@ -126,8 +127,9 @@ int main(int argc, char **argv)
             break;
 
           case 5:
-             printf("caso -c\n");
+            printf("caso -c\n");
             opcao_c(archive, diretorios);
+            feito = 1;
             break;
   
           default:
@@ -136,6 +138,8 @@ int main(int argc, char **argv)
       }
     }
   }
+  if (option == 5 && !feito)
+    opcao_c(archive, diretorios);
   printf("\n");
   printf("Fim!\n");
   if (criado)

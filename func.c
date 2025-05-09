@@ -47,8 +47,7 @@ int le_diretorio(struct diretorio **diretorios, FILE *archive)
     return 0;
   
   fseek(archive, -sizeof(int), SEEK_END); //achar o tamanho do diretório
-  fread(&tam, sizeof(int), 1, archive); //pega o valor e armazena em tam
-  if (tam != 1) //se deu errado a leitura
+  if (fread(&tam, sizeof(int), 1, archive) != 1) //se deu errado a leitura // também pega o valor e armazena em tam
     return 0;
 
   tam_diretorio = (sizeof(int) + tam * sizeof(struct diretorio));
@@ -69,8 +68,17 @@ int le_diretorio(struct diretorio **diretorios, FILE *archive)
 
 void escreve_diretorio(struct diretorio **diretorios, int n, FILE *archive)
 {
+  long int tam_archive, dir_inicio, tam_diretorio;
+
   if (!diretorios || !archive)
     return;
+  
+  fseek(archive, 0, SEEK_END);
+  tam_archive = ftell(archive);
+  tam_diretorio = (sizeof(int) + n * sizeof(struct diretorio));
+  dir_inicio = tam_archive - tam_diretorio;
+  fseek(archive, dir_inicio, SEEK_SET); //onde começa o diretorio
+  ftruncate(fileno(archive), dir_inicio);
 
   for (int i = 0; i < n; i++)
     fwrite(diretorios[i], sizeof(struct diretorio), 1, archive);
@@ -98,7 +106,7 @@ void opcao_ip(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   for (i = 0; i < tam; i++)
   {
     if (strcmp(diretorios[i]->nome, arquivo->nome) == 0)
-      repetido = 1;
+      repetido = 1; 
   }
   
   if (repetido)
@@ -189,14 +197,14 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
 
   fseek(file, 0, SEEK_END);
   og_size = ftell(file);
-  conteudo = malloc(sizeof(og_size));
+  conteudo = malloc(og_size);
   if (!conteudo)
   {
     printf("Erro ao alocar conteudo de arquivo para comprimir\n");
     fclose(file);
     return;
   }
-  new_conteudo = malloc(2 * sizeof(og_size)); //a compressão pode ser maior
+  new_conteudo = malloc(2 * og_size); //a compressão pode ser maior
   if (!new_conteudo)
   {
     printf("Erro ao alocar conteudo de arquivo para comprimir\n");
@@ -206,8 +214,8 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   fseek(file, 0, SEEK_SET);
   fread(conteudo, 1, og_size, file);
   new_size = LZ_Compress((unsigned char *)conteudo,(unsigned char *)new_conteudo, og_size);
-  new = fopen(new_conteudo, "wb"); // contruindo o arquivo comprimido em new
-
+  new = fopen(new_conteudo, "wb");
+  
   if (new_size > og_size)
   {
     comprimido = 0;
@@ -282,7 +290,6 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
 
   fseek(archive, 0, SEEK_END);
   escreve_diretorio(diretorios, (ordem + 1), archive);
-  fclose(new);
   fclose(file);
   free(conteudo);
   free(new_conteudo);
@@ -296,7 +303,7 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
 
 void opcao_x(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios)
 {
-  FILE *file;
+  FILE *file; //falta verificar se o arquivo é comprimido ou não e descomprimir se for o caso
   char buffer[1024];
   long int bytes;
   int num, i, tam;
@@ -306,7 +313,15 @@ void opcao_x(struct diretorio *arquivo, FILE *archive, struct diretorio **direto
 
   tam = le_diretorio(diretorios, archive); //lê o diretório em archive
   if (tam < 0)
+  {
     printf("Erro na leitura do diretório\n");
+    return;
+  }
+  else if (tam == 0)
+  {
+    printf("Sem arquivos no archive\n");
+    return;
+  }
 
   if (arquivo)
   {
@@ -324,7 +339,7 @@ void opcao_x(struct diretorio *arquivo, FILE *archive, struct diretorio **direto
   
     file = fopen(arquivo->nome, "rb+");
     if (!file)
-      {
+    {
       printf("Erro ao abrir o arquivo %s\n", arquivo->nome);
       return;
     }
