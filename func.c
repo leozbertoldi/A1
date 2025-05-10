@@ -249,8 +249,10 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   new_size = LZ_Compress((unsigned char *)conteudo,(unsigned char *)new_conteudo, bytes_lidos);
   new = fopen("temp.o", "wb");
   fwrite(new_conteudo, 1, new_size, new); 
+  fflush(new); // garante que os dados vão pro disco
+  rewind(new); // volta ao início para leitura depois
   
-  if (new_size > og_size)
+  if (new_size >= og_size)
   {
     comprimido = 0;
     arquivo->tamanho_disc = og_size;
@@ -260,6 +262,7 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
     comprimido = 1;
     arquivo->tamanho_disc = new_size;
   }
+  arquivo->tamanho_og = og_size;
 
   fseek(archive, 0, SEEK_END);
   if (tam == 0) //archive vazio
@@ -538,10 +541,11 @@ void opcao_x(char *arquivo, FILE *archive, struct diretorio **diretorios)
       return;
     }
   
-    file = fopen(arquivo, "ab+");
+    file = fopen(arquivo, "wb+");
     if (!file)
     {
       printf("Erro ao abrir o arquivo %s\n", arquivo);
+      free(buffer);
       return;
     }
   
@@ -549,7 +553,7 @@ void opcao_x(char *arquivo, FILE *archive, struct diretorio **diretorios)
     fread(buffer, 1, diretorios[num]->tamanho_disc, archive);
     if (diretorios[num]->tamanho_og != diretorios[num]->tamanho_disc)
     {
-      aux = malloc(diretorios[i]->tamanho_og);
+      aux = malloc(diretorios[num]->tamanho_og);
       if (!aux)
       {
         printf("Erro ao alocar buffer para extrair arquivo\n");
@@ -569,7 +573,7 @@ void opcao_x(char *arquivo, FILE *archive, struct diretorio **diretorios)
   {
     for(i = 0; i < tam; i++)
     {
-      file = fopen(diretorios[i]->nome, "ab+");
+      file = fopen(diretorios[i]->nome, "wb+");
       if (!file)
       {
         printf("Erro ao abrir o arquivo %s\n", arquivo);
