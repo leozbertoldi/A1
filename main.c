@@ -7,7 +7,7 @@
 
 int main(int argc, char **argv)
 {
-  int option, flag, criado, tamanho, capacidade, feito, mover;
+  int option, flag, criado, tamanho, capacidade, feito, mover, extraiu;
   FILE *archive;
   struct diretorio *arquivo, *target, **diretorios;
   char m_mover[1024];
@@ -15,6 +15,7 @@ int main(int argc, char **argv)
   criado = 0;
   feito = 0;
   mover = 0;
+  extraiu = 0;
   capacidade = 10;
 
   diretorios = malloc(capacidade * sizeof(struct diretorio *));
@@ -131,6 +132,7 @@ int main(int argc, char **argv)
           case 3:
             printf("caso -x\n");
             opcao_x(argv[i], archive, diretorios);
+            extraiu++;
             break;
 
           case 4:
@@ -154,6 +156,8 @@ int main(int argc, char **argv)
   }
   if (option == 5 && !feito)
     opcao_c(archive, diretorios);
+  if (option == 3 && !extraiu)
+    opcao_x(NULL, archive, diretorios);
   printf("\n");
   printf("Fim!\n");
   if (criado)

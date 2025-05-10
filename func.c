@@ -480,7 +480,7 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
 
 void opcao_x(char *arquivo, FILE *archive, struct diretorio **diretorios)
 {
-  FILE *file; //falta verificar se o arquivo é comprimido ou não e descomprimir se for o caso
+  FILE *file; 
   char *buffer, *aux;
   int num, i, tam;
   long int maior_arquivo;
