@@ -200,7 +200,7 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   FILE *file, *new;
   long int bytes, bytes_lidos, offset, og_size, new_size;
   char buffer[1024], *conteudo, *new_conteudo;
-  int tam, i, repetido, ordem, comprimido;
+  int tam, i, repetido, repetido_index, ordem, comprimido;
   repetido = ordem = 0;
   comprimido = 1;
 
@@ -214,13 +214,16 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   for (i = 0; i < tam; i++)
   {
     if (strcmp(diretorios[i]->nome, arquivo->nome) == 0)
+    {
       repetido = 1;
+      repetido_index = i;
+    }
   }
   
   if (repetido)
   {
     printf("Arquivo repetido\n"); 
-    opcao_r(arquivo, archive, diretorios);
+    opcao_r(diretorios[repetido_index], archive, diretorios);
     tam = le_diretorio(diretorios, archive); //lê o diretório em archive
     if (tam < 0)
       printf("Erro na leitura do diretório\n");
@@ -258,6 +261,7 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   fwrite(new_conteudo, 1, new_size, new); 
   fflush(new); // garante que os dados vão pro disco
   rewind(new); // volta ao início para leitura depois
+  fclose(new);
   
   if (new_size >= og_size)
   {
