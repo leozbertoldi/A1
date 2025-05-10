@@ -183,7 +183,7 @@ void opcao_ip(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
 void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios)
 {
   FILE *file, *new;
-  long int bytes, offset, og_size, new_size;
+  long int bytes, bytes_lidos, offset, og_size, new_size;
   char buffer[1024], *conteudo, *new_conteudo;
   int tam, i, repetido, ordem, comprimido;
   repetido = ordem = 0;
@@ -225,13 +225,15 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   if (!new_conteudo)
   {
     printf("Erro ao alocar conteudo de arquivo para comprimir\n");
+    free(conteudo);
     fclose(file);
     return;
   }
   fseek(file, 0, SEEK_SET);
-  fread(conteudo, 1, og_size, file);
-  new_size = LZ_Compress((unsigned char *)conteudo,(unsigned char *)new_conteudo, og_size);
-  new = fopen(new_conteudo, "wb");
+  bytes_lidos = fread(conteudo, 1, og_size, file);
+  new_size = LZ_Compress((unsigned char *)conteudo,(unsigned char *)new_conteudo, bytes_lidos);
+  new = fopen("temp.o", "wb");
+  fwrite(new_conteudo, 1, new_size, new); 
   
   if (new_size > og_size)
   {
