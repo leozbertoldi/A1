@@ -21,13 +21,15 @@ int le_diretorio(struct diretorio **diretorios, FILE *archive);
 
 void escreve_diretorio(struct diretorio **diretorios, int n, FILE *archive);
 
+void destroi_diretorios(struct diretorio **diretorios, int n);
+
 void opcao_c(FILE *archive, struct diretorio **diretorios);
 
 void opcao_ip(struct diretorio *arquivo,  FILE *archive, struct diretorio **diretorios);
 
 void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios);
 
-void opcao_m(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios);
+void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **diretorios);
 
 void opcao_x(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios);
 

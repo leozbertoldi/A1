@@ -7,12 +7,14 @@
 
 int main(int argc, char **argv)
 {
-  int option, flag, criado, tamanho, capacidade, feito;
+  int option, flag, criado, tamanho, capacidade, feito, mover;
   FILE *archive;
-  struct diretorio *arquivo, **diretorios;
+  struct diretorio *arquivo, *target, **diretorios;
+  char m_mover[1024];
   tamanho = 0;
   criado = 0;
   feito = 0;
+  mover = 0;
   capacidade = 10;
 
   diretorios = malloc(capacidade * sizeof(struct diretorio *));
@@ -72,7 +74,7 @@ int main(int argc, char **argv)
     }
     else if (flag == 1 && criado == 1)
     {
-      if (option != 3 && option != 5)
+      if (option != 3 && option != 5 && !mover)
         arquivo = inicializa_arquivo(argv[i]);
 
       if (arquivo || option == 3 || option == 5)
@@ -112,8 +114,18 @@ int main(int argc, char **argv)
             break;
 
           case 2:
+            if (!mover)
+            {
+              strncpy(m_mover, argv[i], 1024);
+              mover++;
+              break;
+            }
+            target = inicializa_arquivo(argv[i]);
             printf("caso -m\n");
-            //opcao_m(arquivo, archive, diretorios);
+            if (target)
+              opcao_m(m_mover, target->nome, archive, diretorios);
+            else 
+              opcao_m(m_mover, NULL, archive, diretorios);
             break;
 
           case 3:
@@ -127,6 +139,8 @@ int main(int argc, char **argv)
             break;
 
           case 5:
+            if (feito)
+              break;
             printf("caso -c\n");
             opcao_c(archive, diretorios);
             feito = 1;
@@ -143,8 +157,10 @@ int main(int argc, char **argv)
   printf("\n");
   printf("Fim!\n");
   if (criado)
+    tamanho = le_diretorio(diretorios, archive);
+  if (criado)
     fclose(archive);
-  free(diretorios);
+  destroi_diretorios(diretorios, tamanho);
 
   return 0;
 }

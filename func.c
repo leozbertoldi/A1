@@ -88,6 +88,22 @@ void escreve_diretorio(struct diretorio **diretorios, int n, FILE *archive)
   return;
 }
 
+void destroi_diretorios(struct diretorio **diretorios, int n)
+{
+  if (!diretorios)
+    return;
+
+  for (int i = 0; i < n; i++)
+  {
+   if (diretorios[i])
+     free(diretorios[i]);
+  }
+
+  free(diretorios);
+
+  return;
+}
+
 void opcao_ip(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios)
 {
   FILE *file;
@@ -179,7 +195,8 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   tam = le_diretorio(diretorios, archive); //lê o diretório em archive
   if (tam < 0)
     printf("Erro na leitura do diretório\n");
-   for (i = 0; i < tam; i++)
+
+  for (i = 0; i < tam; i++)
   {
     if (strcmp(diretorios[i]->nome, arquivo->nome) == 0)
       repetido = 1;
@@ -296,10 +313,151 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   return;
 }
 
-/*void opcao_m(struct diretorio *arquivo, FILE  *archive, struct diretorio **diretorios)
+void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **diretorios)
 {
+  int tam, i, num, num_target;
+  long int offset, size;
+  char *buffer, *aux;
+  struct diretorio *temp;
+
+  if (!archive || !diretorios || !arquivo)
+    return;
+
+  if (target && strcmp(arquivo, target) == 0) //caso target e arquivo sejam o mesmo
+  {
+    printf("Posição do membro e destino do membro são iguais\n");
+    return;
+  }
+
+  tam = le_diretorio(diretorios, archive); //lê o diretório em archive
+  if (tam < 0)
+    printf("Erro na leitura do diretório\n");
+
+  if (tam == 0)
+  {
+    printf("Sem membros para mover\n");
+    return;
+  }
+
+  num = -1;
+  for (i = 0; i < tam; i++)
+  {
+    if (strcmp(diretorios[i]->nome, arquivo) == 0)
+      num = i;
+  }
+  if (num == -1)
+  {
+    printf("Arquivo não está no archive\n");
+    return;
+  }
+
+  offset = diretorios[num]->local;
+  size = diretorios[num]->tamanho_disc;
+  buffer = malloc(size);
+  if(!buffer)
+  {
+    printf("Erro ao alocar buffer para ler arquivo para mover\n");
+    return;
+  }
+
+  fseek(archive, offset, SEEK_SET);
+  fread(buffer, 1, size, archive); //armazena em buffer o conteúdo do membro a ser movido
+
+  if (!target) //move para o começo
+  {
+    for(i = num - 1; i >= 0; i--)
+    {
+      aux = malloc(diretorios[i]->tamanho_disc);
+      if (!aux)
+      {
+        printf("Erro ao alocar buffer para mover um arquivo em -m\n");
+        free(buffer);
+        return;
+      }
+      fseek(archive, diretorios[i]->local, SEEK_SET);
+      fread(aux, 1, diretorios[i]->tamanho_disc, archive);
+      diretorios[i]->local = diretorios[i]->local + diretorios[num]->tamanho_disc;
+      fseek(archive, diretorios[i]->local, SEEK_SET);
+      fwrite(aux, 1, diretorios[i]->tamanho_disc, archive);
+      free(aux);
+    }
+    fseek(archive, 0, SEEK_SET);
+    fwrite(buffer, 1, diretorios[num]->tamanho_disc, archive);
+    free(buffer);
+    diretorios[num]->local = 0;
+    temp = diretorios[num];  //atualizando o diretorio
+    for (i = num; i > 0; i--)
+      diretorios[i] = diretorios[i - 1];
+    diretorios[0] = temp;
+    escreve_diretorio(diretorios, tam, archive);
+    return;
+  }
+  else //target existe
+  {
+    for (i = 0; i < tam; i++) //acha o target
+    { 
+      if (strcmp(diretorios[i]->nome, target) == 0)
+        num_target = i;
+    }
+    if (diretorios[num_target]->ordem > diretorios[num]->ordem) //caso 1: arquivo a ser movido está antes do destino
+    {
+      for (i = num + 1; i <= num_target; i++)
+      {
+        aux = malloc(diretorios[i]->tamanho_disc);
+        if (!aux)
+        {
+          printf("Erro ao alocar buffer para mover um arquivo em -m\n");
+          free(buffer);
+          return;
+        }
+        fseek(archive, diretorios[i]->local, SEEK_SET);
+        fread(aux, 1, diretorios[i]->tamanho_disc, archive);
+        diretorios[i]->local = diretorios[i]->local - diretorios[num]->tamanho_disc;
+        fseek(archive, diretorios[i]->local, SEEK_SET);
+        fwrite(aux, 1, diretorios[i]->tamanho_disc, archive);
+        free(aux);
+      }
+      diretorios[num]->local = diretorios[num_target]->local + diretorios[num_target]->tamanho_disc;
+      fseek(archive, diretorios[num]->local, SEEK_SET);
+      fwrite(buffer, 1, diretorios[num]->tamanho_disc, archive);
+      free(buffer);
+      temp = diretorios[num];
+      for (i = num; i < num_target; i++)
+        diretorios[i] = diretorios[i + 1];
+      diretorios[num_target] = temp;
+      escreve_diretorio(diretorios, tam, archive);
+    }
+    else //caso 2: arquivo a ser movido está depois do destino
+    {
+      for (i = num - 1; i > num_target; i--)
+      {
+        aux = malloc(diretorios[i]->tamanho_disc);
+        if (!aux)
+        {
+          printf("Erro ao alocar buffer para mover um arquivo em -m\n");
+          free(buffer);
+          return;
+        }
+        fseek(archive, diretorios[i]->local, SEEK_SET);
+        fread(aux, 1, diretorios[i]->tamanho_disc, archive);
+        diretorios[i]->local = diretorios[i]->local + diretorios[num]->tamanho_disc;
+        fseek(archive, diretorios[i]->local, SEEK_SET);
+        fwrite(aux, 1, diretorios[i]->tamanho_disc, archive);
+        free(aux);
+      }
+      diretorios[num]->local = diretorios[num_target]->local + diretorios[num_target]->tamanho_disc;
+      fseek(archive, diretorios[num]->local, SEEK_SET);
+      fwrite(buffer, 1, diretorios[num]->tamanho_disc, archive);
+      free(buffer);
+      temp = diretorios[num];
+      for (i = num; i > num_target + 1; i--)
+        diretorios[i] = diretorios[i - 1];
+      diretorios[num_target + 1] = temp;
+      escreve_diretorio(diretorios, tam, archive);
+    }
+  }
   return;
-}*/
+}
 
 void opcao_x(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios)
 {
