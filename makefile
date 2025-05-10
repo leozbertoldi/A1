@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS= -Wall -Wextra -g 
 
 all: main.o func.o lz.o
-	$(CC) -o vinac main.o func.o lz.o
+	$(CC) -o vina main.o func.o lz.o
 
 func.o: func.c func.h
 	$(CC) -c $(CFLAGS) func.c
@@ -17,5 +17,5 @@ main.o: main.c func.h
 	$(CC) -c $(CFLAGS) main.c
 
 clean:
-	rm -f *.o *~ vinac
+	rm -f *.o *~ vina
 
