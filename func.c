@@ -408,15 +408,24 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
     for (i = num; i > 0; i--)
       diretorios[i] = diretorios[i - 1];
     diretorios[0] = temp;
+    for (i = 0; i < tam; i++)    // Atualizar a ordem
+      diretorios[i]->ordem = i;
     escreve_diretorio(diretorios, tam, archive);
     return;
   }
   else //target existe
   {
+    num_target = -1;
     for (i = 0; i < tam; i++) //acha o target
     { 
       if (strcmp(diretorios[i]->nome, target) == 0)
         num_target = i;
+    }
+    if (num_target == -1)
+    {  
+      printf("Target não encontrado no archive\n");
+      free(buffer);
+      return;
     }
     if (diretorios[num_target]->ordem > diretorios[num]->ordem) //caso 1: arquivo a ser movido está antes do destino
     {
@@ -444,6 +453,8 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
       for (i = num; i < num_target; i++)
         diretorios[i] = diretorios[i + 1];
       diretorios[num_target] = temp;
+      for (i = 0; i < tam; i++)    // Atualizar a ordem
+        diretorios[i]->ordem = i;
       escreve_diretorio(diretorios, tam, archive);
     }
     else //caso 2: arquivo a ser movido está depois do destino
@@ -469,9 +480,11 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
       fwrite(buffer, 1, diretorios[num]->tamanho_disc, archive);
       free(buffer);
       temp = diretorios[num];
-      for (i = num; i > num_target + 1; i--)
+      for (i = num; i > num_target; i--)
         diretorios[i] = diretorios[i - 1];
       diretorios[num_target + 1] = temp;
+      for (i = 0; i < tam; i++)    // Atualizar a ordem
+        diretorios[i]->ordem = i;
       escreve_diretorio(diretorios, tam, archive);
     }
   }
