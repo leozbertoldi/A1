@@ -18,6 +18,7 @@ struct diretorio *inicializa_arquivo(char *arquivo)
   {
     printf("Erro ao acessar o arquivo\n");
     free(d);
+    d = NULL;
     return NULL;
   }
 
@@ -58,7 +59,10 @@ int le_diretorio(struct diretorio **diretorios, FILE *archive)
   for (i = 0; i < tam; i++)
   {
     if (diretorios[i])
+    {
       free(diretorios[i]);
+      diretorios[i] = NULL;
+    }
     diretorios[i] = malloc(sizeof(struct diretorio));
     fread(diretorios[i], sizeof(struct diretorio), 1, archive);
   }
@@ -97,11 +101,13 @@ void destroi_diretorios(struct diretorio **diretorios, int n)
   for (int i = 0; i < n; i++)
   {
    if (diretorios[i])
+   {
      free(diretorios[i]);
+     diretorios[i] = NULL;
+   }
   }
 
   free(diretorios);
-
   return;
 }
 
@@ -241,6 +247,7 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   {
     printf("Erro ao alocar conteudo de arquivo para comprimir\n");
     free(conteudo);
+    conteudo = NULL;
     fclose(file);
     return;
   }
@@ -332,6 +339,8 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   fclose(file);
   free(conteudo);
   free(new_conteudo);
+  conteudo = NULL;
+  new_conteudo = NULL;
   return;
 }
 
@@ -345,7 +354,7 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
   if (!archive || !diretorios || !arquivo)
     return;
 
-  if (target && strcmp(arquivo, target) == 0) //caso target e arquivo sejam o mesmo
+  if ((target && strcmp(arquivo, target) == 0)) //caso target e arquivo sejam o mesmo
   {
     printf("Posição do membro e destino do membro são iguais\n");
     return;
@@ -372,6 +381,11 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
     printf("Arquivo não está no archive\n");
     return;
   }
+  if (diretorios[num]->local == 0 && !target)
+  {
+    printf("Posição do membro e destino do membro são iguais\n");
+    return;
+  }
 
   offset = diretorios[num]->local;
   size = diretorios[num]->tamanho_disc;
@@ -394,6 +408,7 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
       {
         printf("Erro ao alocar buffer para mover um arquivo em -m\n");
         free(buffer);
+        buffer = NULL;
         return;
       }
       fseek(archive, diretorios[i]->local, SEEK_SET);
@@ -402,10 +417,12 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
       fseek(archive, diretorios[i]->local, SEEK_SET);
       fwrite(aux, 1, diretorios[i]->tamanho_disc, archive);
       free(aux);
+      aux = NULL;
     }
     fseek(archive, 0, SEEK_SET);
     fwrite(buffer, 1, diretorios[num]->tamanho_disc, archive);
     free(buffer);
+    buffer = NULL;
     diretorios[num]->local = 0;
     temp = diretorios[num];  //atualizando o diretorio
     for (i = num; i > 0; i--)
@@ -428,6 +445,7 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
     {  
       printf("Target não encontrado no archive\n");
       free(buffer);
+      buffer = NULL;
       return;
     }
     if (diretorios[num_target]->ordem > diretorios[num]->ordem) //caso 1: arquivo a ser movido está antes do destino
@@ -439,6 +457,7 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
         {
           printf("Erro ao alocar buffer para mover um arquivo em -m\n");
           free(buffer);
+          buffer = NULL;
           return;
         }
         fseek(archive, diretorios[i]->local, SEEK_SET);
@@ -447,11 +466,13 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
         fseek(archive, diretorios[i]->local, SEEK_SET);
         fwrite(aux, 1, diretorios[i]->tamanho_disc, archive);
         free(aux);
+        aux = NULL;
       }
       diretorios[num]->local = diretorios[num_target]->local + diretorios[num_target]->tamanho_disc;
       fseek(archive, diretorios[num]->local, SEEK_SET);
       fwrite(buffer, 1, diretorios[num]->tamanho_disc, archive);
       free(buffer);
+      buffer = NULL;
       temp = diretorios[num];
       for (i = num; i < num_target; i++)
         diretorios[i] = diretorios[i + 1];
@@ -469,6 +490,7 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
         {
           printf("Erro ao alocar buffer para mover um arquivo em -m\n");
           free(buffer);
+          buffer = NULL;
           return;
         }
         fseek(archive, diretorios[i]->local, SEEK_SET);
@@ -477,11 +499,13 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
         fseek(archive, diretorios[i]->local, SEEK_SET);
         fwrite(aux, 1, diretorios[i]->tamanho_disc, archive);
         free(aux);
+        aux = NULL;
       }
       diretorios[num]->local = diretorios[num_target]->local + diretorios[num_target]->tamanho_disc;
       fseek(archive, diretorios[num]->local, SEEK_SET);
       fwrite(buffer, 1, diretorios[num]->tamanho_disc, archive);
       free(buffer);
+      buffer = NULL;
       temp = diretorios[num];
       for (i = num; i > num_target; i--)
         diretorios[i] = diretorios[i - 1];
@@ -538,6 +562,7 @@ void opcao_x(char *arquivo, FILE *archive, struct diretorio **diretorios)
     {
       printf("Arquivo não está no archive\n");
       free(buffer);
+      buffer = NULL;
       return;
     }
   
@@ -546,6 +571,7 @@ void opcao_x(char *arquivo, FILE *archive, struct diretorio **diretorios)
     {
       printf("Erro ao abrir o arquivo %s\n", arquivo);
       free(buffer);
+      buffer = NULL;
       return;
     }
   
@@ -558,12 +584,14 @@ void opcao_x(char *arquivo, FILE *archive, struct diretorio **diretorios)
       {
         printf("Erro ao alocar buffer para extrair arquivo\n");
         free(buffer);
+        buffer = NULL;
         fclose(file);
         return;
       }
       LZ_Uncompress((unsigned char *)buffer, (unsigned char *)aux, (unsigned int)diretorios[num]->tamanho_disc);
       fwrite(aux, 1, diretorios[num]->tamanho_og, file);
       free(aux);
+      aux = NULL;
     }
     else
       fwrite(buffer, 1, diretorios[num]->tamanho_disc, file); //não precisa descomprimir
@@ -588,12 +616,14 @@ void opcao_x(char *arquivo, FILE *archive, struct diretorio **diretorios)
         {  
           printf("Erro ao alocar buffer para extrair arquivo\n");
           free(buffer);
+          buffer = NULL;
           fclose(file);
           return;
         }
         LZ_Uncompress((unsigned char *)buffer, (unsigned char *)aux, (unsigned int)diretorios[i]->tamanho_disc);
         fwrite(aux, 1, diretorios[i]->tamanho_og, file);
         free(aux);
+        aux = NULL;
       }
       else
         fwrite(buffer, 1, diretorios[i]->tamanho_disc, file); //não precisa descomprimir
@@ -602,6 +632,7 @@ void opcao_x(char *arquivo, FILE *archive, struct diretorio **diretorios)
   }
 
   free(buffer);
+  buffer = NULL;
   return;
 }
 
@@ -645,9 +676,9 @@ void opcao_r(struct diretorio *arquivo, FILE *archive, struct diretorio **direto
     fseek(archive, diretorios[i]->local, SEEK_SET);
     fwrite(buffer, 1, diretorios[i]->tamanho_disc, archive);
     free(buffer);
+    buffer = NULL;
   }
 
-  free(diretorios[tam]);
   for (i = num; i < tam - 1; i++) //arruma a ordem do arquivos que estão depois
   {
     diretorios[i] = diretorios[i + 1];
