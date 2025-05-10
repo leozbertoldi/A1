@@ -43,6 +43,7 @@ int main(int argc, char **argv)
         case 'm':
           option = 2;
           flag = 1;
+          mover = 1;
           break;
 
         case 'x':
@@ -74,10 +75,10 @@ int main(int argc, char **argv)
     }
     else if (flag == 1 && criado == 1)
     {
-      if (option != 3 && option != 5 && !mover)
+      if ((option != 3 && option != 5) && !mover)
         arquivo = inicializa_arquivo(argv[i]);
 
-      if (arquivo || option == 3 || option == 5)
+      if (arquivo || option == 3 || option == 5 || mover)
       {
         switch (option)
         {
@@ -114,10 +115,9 @@ int main(int argc, char **argv)
             break;
 
           case 2:
-            if (!mover)
+            if (strlen(m_mover) == 0) //verifica se m_mover está vazio
             {
               strncpy(m_mover, argv[i], 1024);
-              mover++;
               break;
             }
             target = inicializa_arquivo(argv[i]);
@@ -130,7 +130,7 @@ int main(int argc, char **argv)
 
           case 3:
             printf("caso -x\n");
-            opcao_x(arquivo, archive, diretorios);
+            opcao_x(argv[i], archive, diretorios);
             break;
 
           case 4:
@@ -157,9 +157,10 @@ int main(int argc, char **argv)
   printf("\n");
   printf("Fim!\n");
   if (criado)
+  {
     tamanho = le_diretorio(diretorios, archive);
-  if (criado)
     fclose(archive);
+  }
   //destroi_diretorios(diretorios, tamanho);
 
   return 0;
