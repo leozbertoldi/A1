@@ -165,7 +165,7 @@ int main(int argc, char **argv)
     tamanho = le_diretorio(diretorios, archive);
     fclose(archive);
   }
-  //destroi_diretorios(diretorios, tamanho);
-
+  
+  destroi_diretorios(diretorios, tamanho);
   return 0;
 }

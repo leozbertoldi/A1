@@ -475,6 +475,8 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
       escreve_diretorio(diretorios, tam, archive);
     }
   }
+  fflush(archive); // Garante que tudo foi escrito antes de truncar
+  ftruncate(fileno(archive), ftell(archive));
   return;
 }
 
@@ -628,16 +630,15 @@ void opcao_r(struct diretorio *arquivo, FILE *archive, struct diretorio **direto
     free(buffer);
   }
 
+  free(diretorios[tam]);
   for (i = num; i < tam - 1; i++) //arruma a ordem do arquivos que estão depois
   {
     diretorios[i] = diretorios[i + 1];
     diretorios[i]->ordem = diretorios[i]->ordem - 1;
   }
+  diretorios[tam-1] = NULL;
 
-  if (diretorios[tam-1])
-    free(diretorios[tam-1]);
   tam--;
-
   if (tam == 0)
     fim = 0;
   else 
@@ -646,6 +647,8 @@ void opcao_r(struct diretorio *arquivo, FILE *archive, struct diretorio **direto
   fflush(archive);
   ftruncate(fileno(archive), fim);
   escreve_diretorio(diretorios, tam, archive);
+  fflush(archive); // Garante que tudo foi escrito antes de truncar
+  ftruncate(fileno(archive), ftell(archive));
 
   return;
 }
