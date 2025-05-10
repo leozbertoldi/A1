@@ -66,9 +66,9 @@ int main(int argc, char **argv)
     }  
     else if (strcmp(argv[i], "archive.vc") == 0 && criado == 0)
     {
-      archive = fopen(argv[i], "ab+");
+      archive = fopen(argv[i], "r+b");
       if (!archive)
-        printf("ARCHIVE NÃO FOI CRIADO\n");
+        archive = fopen("archive.vc", "w+b"); // cria do zero
       printf("ARCHIVE CRIADO\n");
       criado = 1;
     }
@@ -160,7 +160,7 @@ int main(int argc, char **argv)
     tamanho = le_diretorio(diretorios, archive);
   if (criado)
     fclose(archive);
-  destroi_diretorios(diretorios, tamanho);
+  //destroi_diretorios(diretorios, tamanho);
 
   return 0;
 }

@@ -127,13 +127,19 @@ void opcao_ip(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   
   if (repetido)
   {
-    printf("Arquivo repetido\n"); //temporário
-    return;
+    printf("Arquivo repetido\n");
+    opcao_r(arquivo, archive, diretorios);
+    tam = le_diretorio(diretorios, archive); //lê o diretório em archive
+    if (tam < 0)
+      printf("Erro na leitura do diretório\n");
   }
 
   file = fopen(arquivo->nome, "rb");
   if (!file)
+  {
     printf("Erro ao abrir o arquivo %s\n", arquivo->nome);
+    return;
+  }
 
   fseek(archive, 0, SEEK_END);
   if (tam == 0) //archive vazio
@@ -152,7 +158,7 @@ void opcao_ip(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
     arquivo->ordem = 0;
     diretorios[0] = arquivo;
   }
-  else if (!repetido)
+  else 
   {
     offset = 0;
     for (i = 0; i < tam; i++)
@@ -204,13 +210,19 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   
   if (repetido)
   {
-    printf("Arquivo repetido\n"); //temporário
-    return;
+    printf("Arquivo repetido\n"); 
+    opcao_r(arquivo, archive, diretorios);
+    tam = le_diretorio(diretorios, archive); //lê o diretório em archive
+    if (tam < 0)
+      printf("Erro na leitura do diretório\n");
   }
 
   file = fopen(arquivo->nome, "rb");
   if (!file)
+  {
     printf("Erro ao abrir o arquivo %s\n", arquivo->nome);
+    return;
+  }
 
   fseek(file, 0, SEEK_END);
   og_size = ftell(file);
@@ -274,7 +286,7 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
     arquivo->ordem = 0;
     diretorios[0] = arquivo;
   }
-  else if (!repetido)
+  else 
   {
     offset = 0;
     for (i = 0; i < tam; i++)
