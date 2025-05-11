@@ -17,7 +17,7 @@ int main(int argc, char **argv)
   mover = 0;
   extraiu = 0;
   mov_1 = 0;
-  capacidade = 10;
+  capacidade = 50;
 
   diretorios = malloc(capacidade * sizeof(struct diretorio *));
   if (!diretorios)

@@ -24,7 +24,7 @@ struct diretorio *inicializa_arquivo(char *arquivo)
 
   strncpy(d->nome, arquivo, 99);
   d->nome[99] = '\0';
-  d->UID = info.st_uid;
+  d->UID = getuid();
   d->tamanho_og = info.st_size;
   d->tamanho_disc = info.st_size;
   d->data = info.st_mtime; 
