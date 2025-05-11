@@ -1,0 +1,65 @@
+============  Relatório de programação 2  ============
+                Arquivador VINAc
+Leonardo Zandonai Bertoldi
+GRR20240476
+======================================================
+
+    Explicação
+ O projeto consiste em implementar um arquivador com suporte a compressão, ou seja, que salve em sequência uma coleção de arquivos (planos ou comprimidos)
+dentro de outro arquivo denominado “archive”. Dessa forma, é possível, por meio de uma estrutura denominada “diretório”, recuperar o conteúdo de cada arquivo
+individualmente. Esse diretório é uma área de síntese de todo o conteúdo do archive, que, junto ao conteúdo dos arquivos, está escrito no archive. 
+Na minha implementação, o conteúdo do diretório é escrito no fim do archive.
+
+    Sobre os arquivos contidos no pacote de entrega
+Makefile: Útil para compilar e gerar o executável vina no diretório. Também limpa arquivos extras.
+Main.c e Func.c: São os códigos brutos. Na main.c, encontra-se o fluxo de execução no programa e o controle de flags e arquivos. 
+Já no func.c, encontram-se os códigos das opções possíveis para o arquivador, além de auxiliares para leitura, escrita e inicialização 
+de arquivos e diretórios.
+Func.h: Arquivo cabeçalho em que são declaradas as funções necessárias e as structs utilizadas no programa.
+Lz.c e Lz.h: Bibliotecas de compressão prontas.
+
+Sobre os algoritmos e implementações
+Em relação à execução, o fluxo principal do programa é uma máquina de estados que controla as possíveis opções de 
+flags, inicializa arquivos, e manipula variáveis para o funcionamento correto do código. 
+Para cada opção escolhida pelo usuário, uma função distinta é chamada, a fim de cumprir os requisitos e alterações necessárias no archive. 
+    Dentre as opções:
+	
+    Inserção de arquivo (-ip): Se for repetido, remove(-r) e insere no fim. Senão, insere direto no fim. 
+Para isso, leio o arquivo em um buffer e escrevo no archive manipulando os ponteiros. 
+Depois, trunca o arquivo e escreve o novo diretório.
+
+	Inserção de arquivo comprimido (-ic): Analisa se o tamanho comprimido é menor que o tamanho 
+original, e, se for, comprime.  Se for repetido, remove(-r) e insere no fim. Senão, insere direto no fim. 
+Para isso, leio o arquivo em um buffer e escrevo no archive manipulando os ponteiros. 
+Depois, trunca o arquivo e escreve o novo diretório.
+
+	Mover membros (-m): Move um membro para a próxima posição depois de um membro target. 
+Se não existir target, deve mover o membro para o início do archive. 
+É uma função complexa, sua implementação passa por um loop que lê um arquivo de cada 
+vez e sobe ou desce seu conteúdo de posição. 
+Isso é decidido com base em 2 casos: a)O target está antes do arquivo e precisamos subir
+de posição todos os membros pós-target. b) o target está depois do arquivo e precisamos 
+descer de posição todos os membros inclusive o target. Após isso, trunca atualiza a ordem 
+para escrever o novo diretório.
+
+	Extrair arquivo (-x): Identifica a posição de um arquivo dentro de archive. 
+A partir da posição, lê o conteúdo e escreve em um arquivo criado. 
+Se o arquivo for comprimido, descomprime e extrai. 
+Caso não hajam parâmetros para a função, ela extrai todos os membros de archive.
+
+	Remover membros (-r): Remove o conteúdo de um membro do archive e suas informações do diretório. 
+Para isso, identifica o offset do arquivo a ser removido e o sobrescreve com os demais arquivos. 
+Ao final, trunca na última posição de conteúdo e escreve o diretório sem o membro removido.
+
+Listar conteúdo (-c): Lista todo o conteúdo do diretório escrito em archive. 
+Útil para analisar as estatísticas dos arquivos conhecidos. 
+Para isso, inicia um ponteiro ao fim do archive e volta os bytes necessários para achar a posição de início do diretório.
+	
+BUGS CONHECIDOS
+
+De forma objetiva, possíveis bugs presentes no arquivador envolvem dois casos: 
+1- Muitos arquivos inseridos talvez causem um comportamento instável do programa.
+2- Opção mover. Em alguns casos, a função mover pode não reconhecer arquivos 
+presentes no archive. Caso isso ocorra, executar novamente o programa deve resolver o problema.
+
+
