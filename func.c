@@ -197,9 +197,9 @@ void opcao_ip(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
 
 void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios)
 {
-  FILE *file, *new;
-  long int bytes, bytes_lidos, offset, og_size, new_size;
-  char buffer[1024], *conteudo, *new_conteudo;
+  FILE *file;
+  long int bytes_lidos, offset, og_size, new_size;
+  char *conteudo, *new_conteudo;
   int tam, i, repetido, repetido_index, ordem, comprimido;
   repetido = ordem = 0;
   comprimido = 1;
@@ -209,7 +209,10 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   
   tam = le_diretorio(diretorios, archive); //lê o diretório em archive
   if (tam < 0)
+  {
     printf("Erro na leitura do diretório\n");
+    return;
+  }
 
   for (i = 0; i < tam; i++)
   {
@@ -226,7 +229,10 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
     opcao_r(diretorios[repetido_index], archive, diretorios);
     tam = le_diretorio(diretorios, archive); //lê o diretório em archive
     if (tam < 0)
+    {
       printf("Erro na leitura do diretório\n");
+      return;
+    }
   }
 
   file = fopen(arquivo->nome, "rb");
@@ -238,6 +244,7 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
 
   fseek(file, 0, SEEK_END);
   og_size = ftell(file);
+
   conteudo = malloc(og_size);
   if (!conteudo)
   {
@@ -245,7 +252,7 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
     fclose(file);
     return;
   }
-  new_conteudo = malloc(2 * og_size); //a compressão pode ser maior
+  new_conteudo = malloc(2 * og_size + 1024); //a compressão pode ser maior
   if (!new_conteudo)
   {
     printf("Erro ao alocar conteudo de arquivo para comprimir\n");
@@ -257,11 +264,15 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   fseek(file, 0, SEEK_SET);
   bytes_lidos = fread(conteudo, 1, og_size, file);
   new_size = LZ_Compress((unsigned char *)conteudo,(unsigned char *)new_conteudo, bytes_lidos);
-  new = fopen("temp.o", "wb");
-  fwrite(new_conteudo, 1, new_size, new); 
-  fflush(new); // garante que os dados vão pro disco
-  rewind(new); // volta ao início para leitura depois
-  fclose(new);
+  if (new_size <= 0) {
+    printf("Erro na compressão LZ\n");
+    free(conteudo);
+    free(new_conteudo);
+    conteudo = NULL;
+    new_conteudo = NULL;
+    fclose(file);
+    return;
+  }
   
   if (new_size >= og_size)
   {
@@ -281,26 +292,12 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
     fflush(archive);
     ftruncate(fileno(archive), 0); //exclui lixos de memória
     fseek(archive, 0, SEEK_SET);
-    offset = ftell(archive); //posição do arquivo
+    offset = 0; //posição do arquivo
     arquivo->local = offset;
     if (comprimido == 0)
-    {  
-      bytes = fread(buffer, 1, sizeof(buffer), file);
-      while (bytes > 0) //escreve os bytes do file em archive
-      {
-        fwrite(buffer, 1, bytes, archive);
-        bytes = fread(buffer, 1, sizeof(buffer), file);
-      }
-    }
+      fwrite(conteudo, 1, og_size, archive);
     else
-    {
-      bytes = fread(buffer, 1, sizeof(buffer), new);
-      while (bytes > 0) //escreve os bytes do file em archive
-      {
-        fwrite(buffer, 1, bytes, archive);
-        bytes = fread(buffer, 1, sizeof(buffer), new);
-      }
-    }
+      fwrite(new_conteudo, 1, new_size, archive);
     arquivo->ordem = 0;
     diretorios[0] = arquivo;
   }
@@ -317,23 +314,9 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
     fseek(archive, offset, SEEK_SET);
     arquivo->local = offset;
     if (comprimido == 0)
-    {  
-      bytes = fread(buffer, 1, sizeof(buffer), file);
-      while (bytes > 0) //escreve os bytes do file em archive
-      {
-        fwrite(buffer, 1, bytes, archive);
-        bytes = fread(buffer, 1, sizeof(buffer), file);
-      }
-    }
+      fwrite(conteudo, 1, og_size, archive);
     else
-    {
-      bytes = fread(buffer, 1, sizeof(buffer), new);
-      while (bytes > 0) //escreve os bytes do file em archive
-      {
-        fwrite(buffer, 1, bytes, archive);
-        bytes = fread(buffer, 1, sizeof(buffer), new);
-      }
-    }
+      fwrite(new_conteudo, 1, new_size, archive);
     arquivo->ordem = ordem;
     diretorios[ordem] = arquivo;
   }
@@ -570,7 +553,7 @@ void opcao_x(char *arquivo, FILE *archive, struct diretorio **diretorios)
       return;
     }
   
-    file = fopen(arquivo, "wb+");
+    file = fopen(arquivo, "wb");
     if (!file)
     {
       printf("Erro ao abrir o arquivo %s\n", arquivo);
