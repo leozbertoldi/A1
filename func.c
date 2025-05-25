@@ -114,8 +114,8 @@ void destroi_diretorios(struct diretorio **diretorios, int n)
 void opcao_ip(struct diretorio *arquivo, FILE *archive, struct diretorio **diretorios)
 {
   FILE *file;
-  long int bytes, offset;
-  char buffer[1024];
+  long int offset, bytes, maior_arquivo;
+  char *buffer;
   int tam, i, repetido, ordem;
   repetido = ordem = 0;
 
@@ -156,11 +156,13 @@ void opcao_ip(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
     fseek(archive, 0, SEEK_SET);
     offset = ftell(archive); //posição do arquivo
     arquivo->local = offset;
-    bytes = fread(buffer, 1, sizeof(buffer), file);
-    while (bytes > 0) //escreve os bytes do file em archive
+    maior_arquivo = 1;
+    buffer = malloc(maior_arquivo);
+    bytes = fread(buffer, 1, 1, file);
+    while (bytes > 0)
     {
       fwrite(buffer, 1, bytes, archive);
-      bytes = fread(buffer, 1, sizeof(buffer), file);
+      bytes = fread(buffer, 1, 1, file);
     }
     arquivo->tamanho_disc = arquivo->tamanho_og;
     arquivo->ordem = 0;
@@ -178,12 +180,9 @@ void opcao_ip(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
     ftruncate(fileno(archive), offset); //trunca o archive sem o diretorio
     fseek(archive, offset, SEEK_SET);
     arquivo->local = offset;
-    bytes = fread(buffer, 1, sizeof(buffer), file);
-    while (bytes > 0) //escreve os bytes do file em archive
-    {
-      fwrite(buffer, 1, bytes, archive);
-      bytes = fread(buffer, 1, sizeof(buffer), file);
-    }
+    buffer = malloc(arquivo->tamanho_og);
+    bytes = fread(buffer, 1, arquivo->tamanho_og, file);
+    fwrite(buffer, 1, bytes, archive);
     arquivo->tamanho_disc = arquivo->tamanho_og;
     arquivo->ordem = ordem;
     diretorios[ordem] = arquivo;
@@ -192,6 +191,7 @@ void opcao_ip(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
   fseek(archive, 0, SEEK_END);
   escreve_diretorio(diretorios, (ordem + 1), archive);
   fclose(file);
+  free(buffer);
   return;
 }
 
@@ -300,6 +300,7 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
       fwrite(new_conteudo, 1, new_size, archive);
     arquivo->ordem = 0;
     diretorios[0] = arquivo;
+    fflush(archive);
   }
   else 
   {
@@ -319,6 +320,7 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
       fwrite(new_conteudo, 1, new_size, archive);
     arquivo->ordem = ordem;
     diretorios[ordem] = arquivo;
+    fflush(archive);
   }
 
   fseek(archive, 0, SEEK_END);
@@ -534,6 +536,8 @@ void opcao_x(char *arquivo, FILE *archive, struct diretorio **diretorios)
     if (diretorios[i]->tamanho_disc > maior_arquivo)
       maior_arquivo = diretorios[i]->tamanho_disc;
   }
+  if (maior_arquivo == 0)
+    return;
   buffer = malloc(maior_arquivo);
   printf("Maior arquivo: %ld\n", maior_arquivo);
 

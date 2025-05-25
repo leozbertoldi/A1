@@ -7,16 +7,16 @@
 
 int main(int argc, char **argv)
 {
-  int capacidade, tamanho;
+  int capacidade, tamanho, i;
   FILE *archive;
   struct diretorio *arquivo, **diretorios;;
   capacidade = 50;
 
-  diretorios = malloc(capacidade * sizeof(struct diretorio *));
-  if (!diretorios)
+  if (argc < 3 || argv[1][0] != '-')
     return -1;
 
-  if (argc < 3 || argv[1][0] != '-')
+  diretorios = malloc(capacidade * sizeof(struct diretorio *));
+  if (!diretorios)
     return -1;
 
   archive = fopen(argv[2], "r+b");
@@ -27,27 +27,49 @@ int main(int argc, char **argv)
   }
 
   tamanho = le_diretorio(diretorios, archive);
+  if (tamanho < 0) 
+  {
+    printf("Erro na leitura do diretório\n");
+    destroi_diretorios(diretorios, tamanho);
+    diretorios = NULL;
+    fclose(archive);
+    return -1;
+  }
 
   switch (argv[1][1])
   {
     case 'i':
-      arquivo = inicializa_arquivo(argv[3]);
-      if (!arquivo)
-      {
-        fclose(archive);
-        destroi_diretorios(diretorios, tamanho);
-        diretorios = NULL;
-        return -1;
-      }
       if(argv[1][2] == 'p')
       {
         printf("caso -ip\n");
-        opcao_ip(arquivo, archive, diretorios);
+        for (i = 3; i < argc; i++)
+        {
+          arquivo = inicializa_arquivo(argv[i]);
+          if (!arquivo)
+          {
+            fclose(archive);
+            destroi_diretorios(diretorios, tamanho);
+            diretorios = NULL;
+            return -1;
+          }
+          opcao_ip(arquivo, archive, diretorios);
+        }
       }
       else if (argv[1][2] == 'c')
       {
         printf("caso -ic\n");
-        opcao_ic(arquivo, archive, diretorios);
+        for (i = 3; i < argc; i++)
+        {
+          arquivo = inicializa_arquivo(argv[i]);
+          if (!arquivo)
+          {
+            fclose(archive);
+            destroi_diretorios(diretorios, tamanho);
+            diretorios = NULL;
+            return -1;
+          }
+          opcao_ip(arquivo, archive, diretorios);
+        }
       }
       break;
 
@@ -69,15 +91,18 @@ int main(int argc, char **argv)
 
     case 'r':
       printf("caso -r\n");
-      arquivo = inicializa_arquivo(argv[3]);
-      if (!arquivo)
+      for (i = 3; i < argc; i++)
       {
-        fclose(archive);
-        destroi_diretorios(diretorios, tamanho);
-        diretorios = NULL;
-        return -1;
+        arquivo = inicializa_arquivo(argv[i]);
+        if (!arquivo)
+        {
+          fclose(archive);
+          destroi_diretorios(diretorios, tamanho);
+          diretorios = NULL;
+          return -1;
+        }
+        opcao_r(arquivo, archive, diretorios);
       }
-      opcao_r(arquivo, archive, diretorios);
       break;
 
     case 'c':
