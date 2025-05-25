@@ -68,7 +68,7 @@ int main(int argc, char **argv)
             diretorios = NULL;
             return -1;
           }
-          opcao_ip(arquivo, archive, diretorios);
+          opcao_ic(arquivo, archive, diretorios);
         }
       }
       break;
