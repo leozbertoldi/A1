@@ -7,10 +7,9 @@
 
 int main(int argc, char **argv)
 {
-  int option, capacidade, tamanho;
+  int capacidade, tamanho;
   FILE *archive;
-  struct diretorio *arquivo, *target, **diretorios;
-  char m_mover[1024];
+  struct diretorio *arquivo, **diretorios;;
   capacidade = 50;
 
   diretorios = malloc(capacidade * sizeof(struct diretorio *));
@@ -18,7 +17,7 @@ int main(int argc, char **argv)
     return -1;
 
   if (argc < 3 || argv[1][0] != '-')
-    return;
+    return -1;
 
   archive = fopen(argv[2], "r+b");
   if (!archive)
@@ -38,6 +37,7 @@ int main(int argc, char **argv)
         fclose(archive);
         destroi_diretorios(diretorios, tamanho);
         diretorios = NULL;
+        return -1;
       }
       if(argv[1][2] == 'p')
       {
@@ -52,8 +52,9 @@ int main(int argc, char **argv)
       break;
 
     case 'm':
+      printf("caso -m\n");
       if (argc == 4)
-        opcao_m(argv[3], diretorios[0]->nome, archive, diretorios);
+        opcao_m(argv[3], NULL, archive, diretorios);
       else 
         opcao_m(argv[3], argv[4], archive, diretorios);
       break;
@@ -74,6 +75,7 @@ int main(int argc, char **argv)
         fclose(archive);
         destroi_diretorios(diretorios, tamanho);
         diretorios = NULL;
+        return -1;
       }
       opcao_r(arquivo, archive, diretorios);
       break;
