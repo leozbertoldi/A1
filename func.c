@@ -26,6 +26,7 @@ struct diretorio *inicializa_arquivo(char *arquivo)
   d->nome[99] = '\0';
   d->UID = getuid();
   d->tamanho_og = info.st_size;
+  printf("Tamanho original: %ld\n", d->tamanho_og);
   d->tamanho_disc = info.st_size;
   d->data = info.st_mtime; 
   d->ordem = -1;

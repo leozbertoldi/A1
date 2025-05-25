@@ -24,6 +24,6 @@ $(TARGET_DIR):
 	mkdir -p $(TARGET_DIR)
 
 clean:
-	rm -f *.o *~ vina
-	rm -rf $(login)
+	rm -f *.o *~ vinac
+	rm -rf $(TARGET_DIR)
 
