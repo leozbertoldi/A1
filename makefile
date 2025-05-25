@@ -3,9 +3,13 @@
 
 CC = gcc
 CFLAGS= -Wall -Wextra -g 
+TARGET_DIR = login
+TARGET = $(TARGET_DIR)/vinac
 
-all: main.o func.o lz.o
-	$(CC) -o vina main.o func.o lz.o
+all: $(TARGET)
+
+$(TARGET): main.o func.o lz.o | $(TARGET_DIR)
+	$(CC) -o $@ main.o func.o lz.o
 
 func.o: func.c func.h
 	$(CC) -c $(CFLAGS) func.c
@@ -16,6 +20,10 @@ lz.o: lz.c lz.h
 main.o: main.c func.h
 	$(CC) -c $(CFLAGS) main.c
 
+$(TARGET_DIR):
+	mkdir -p $(TARGET_DIR)
+
 clean:
 	rm -f *.o *~ vina
+	rm -rf $(login)
 
