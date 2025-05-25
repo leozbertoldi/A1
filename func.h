@@ -19,7 +19,7 @@ struct diretorio *inicializa_arquivo(char *arquivo);
 
 int le_diretorio(struct diretorio **diretorios, FILE *archive);
 
-void escreve_diretorio(struct diretorio **diretorios, int n, FILE *archive);
+void escreve_diretorio(struct diretorio **diretorios, int n, FILE *archive, int insere);
 
 void destroi_diretorios(struct diretorio **diretorios, int n);
 

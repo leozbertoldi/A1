@@ -26,7 +26,6 @@ struct diretorio *inicializa_arquivo(char *arquivo)
   d->nome[99] = '\0';
   d->UID = getuid();
   d->tamanho_og = info.st_size;
-  printf("Tamanho original: %ld\n", d->tamanho_og);
   d->tamanho_disc = info.st_size;
   d->data = info.st_mtime; 
   d->ordem = -1;
@@ -71,20 +70,22 @@ int le_diretorio(struct diretorio **diretorios, FILE *archive)
   return tam;
 }
 
-void escreve_diretorio(struct diretorio **diretorios, int n, FILE *archive)
+void escreve_diretorio(struct diretorio **diretorios, int n, FILE *archive, int insere)
 {
   long int tam_archive, dir_inicio, tam_diretorio;
 
   if (!diretorios || !archive)
     return;
-  
+
   fseek(archive, 0, SEEK_END);
   tam_archive = ftell(archive);
   tam_diretorio = (sizeof(int) + n * sizeof(struct diretorio));
   dir_inicio = tam_archive - tam_diretorio;
-  fseek(archive, dir_inicio, SEEK_SET); //onde começa o diretorio
+  fseek(archive, dir_inicio, SEEK_SET); //onde começa o diretorio 
   fflush(archive);
-  ftruncate(fileno(archive), dir_inicio);
+  if (!insere)
+    ftruncate(fileno(archive), dir_inicio);
+  fseek(archive, 0, SEEK_END);
 
   for (int i = 0; i < n; i++)
     fwrite(diretorios[i], sizeof(struct diretorio), 1, archive);
@@ -189,8 +190,13 @@ void opcao_ip(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
     diretorios[ordem] = arquivo;
   }
 
+  fflush(archive);
   fseek(archive, 0, SEEK_END);
-  escreve_diretorio(diretorios, (ordem + 1), archive);
+  escreve_diretorio(diretorios, ordem, archive, 1);
+  fseek(archive, -(sizeof(int)), SEEK_END);
+  fwrite(diretorios[ordem], sizeof(struct diretorio), 1, archive);
+  ordem++;
+  fwrite(&ordem, sizeof(int), 1, archive);
   fclose(file);
   free(buffer);
   return;
@@ -324,8 +330,13 @@ void opcao_ic(struct diretorio *arquivo, FILE *archive, struct diretorio **diret
     fflush(archive);
   }
 
+  fflush(archive);
   fseek(archive, 0, SEEK_END);
-  escreve_diretorio(diretorios, (ordem + 1), archive);
+  escreve_diretorio(diretorios, ordem, archive, 1);
+  fseek(archive, -(sizeof(int)), SEEK_END);
+  fwrite(diretorios[ordem], sizeof(struct diretorio), 1, archive);
+  ordem++;
+  fwrite(&ordem, sizeof(int), 1, archive);
   fclose(file);
   free(conteudo);
   free(new_conteudo);
@@ -420,7 +431,7 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
     diretorios[0] = temp;
     for (i = 0; i < tam; i++)    // Atualizar a ordem
       diretorios[i]->ordem = i;
-    escreve_diretorio(diretorios, tam, archive);
+    escreve_diretorio(diretorios, tam, archive, 0);
     return;
   }
   else //target existe
@@ -469,7 +480,7 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
       diretorios[num_target] = temp;
       for (i = 0; i < tam; i++)    // Atualizar a ordem
         diretorios[i]->ordem = i;
-      escreve_diretorio(diretorios, tam, archive);
+      escreve_diretorio(diretorios, tam, archive, 0);
     }
     else //caso 2: arquivo a ser movido está depois do destino
     {
@@ -502,7 +513,7 @@ void opcao_m(char *arquivo, char *target, FILE *archive, struct diretorio **dire
       diretorios[num_target + 1] = temp;
       for (i = 0; i < tam; i++)    // Atualizar a ordem
         diretorios[i]->ordem = i;
-      escreve_diretorio(diretorios, tam, archive);
+      escreve_diretorio(diretorios, tam, archive, 0);
     }
   }
   fflush(archive); // Garante que tudo foi escrito antes de truncar
@@ -686,7 +697,7 @@ void opcao_r(struct diretorio *arquivo, FILE *archive, struct diretorio **direto
 
   fflush(archive);
   ftruncate(fileno(archive), fim);
-  escreve_diretorio(diretorios, tam, archive);
+  escreve_diretorio(diretorios, tam, archive, 1);
   fflush(archive); // Garante que tudo foi escrito antes de truncar
   ftruncate(fileno(archive), ftell(archive));
 
